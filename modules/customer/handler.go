@@ -2,8 +2,9 @@ package controller
 
 import (
 	"net/http"
+	"log"
 
-	repository "github.com/gulliverwald/clean-arch-go/modules/customer/repository"
+	repository "github.com/gulliverwald/clean-arch-go/modules/customer/repositories"
 	. "github.com/gulliverwald/clean-arch-go/modules/customer/usecase"
 
 	"github.com/gin-gonic/gin"
@@ -14,47 +15,115 @@ type CustomerHandler struct {
 	CustomerUsecase domain.CustomerUsecase
 }
 
-func NewCustomerController(c *gin.Context) {
-	useCase = New(&repository.MySqlRepository{})
+func NewCustomerController(route *gin.Engine) {
+	useCase := NewCustomerUsecase(&repository.MySqlRepository{})
 
 	handler := &CustomerHandler{
-		CustomerUsecase: useCase
+		CustomerUsecase: useCase,
 	}
 
-	c.POST("/customer", handler.Create)
-	c.GET("/customer", handler.Fetch)
+	route.POST("/customer", handler.Create)
+	route.GET("/customer", handler.Fetch)
+	route.GET("/customer/:id", handler.GetById)
+	route.PUT("/customer/:id", handler.Update)
+	route.DELETE("/customer/:id", handler.Delete)
 }
 
-func (cus *CustomerHandler) Create(c gin.Context) err error {
+func (cus *CustomerHandler) Create(ctx *gin.Context) {
 	var customer domain.Customer
-
-	if err != nil {
-		return c.JSON(http.StatusUnprocessableEntity, err.Error())
-	}
-
-	ctx := c.Request().Context()
-	err = cus.CustomerUsecase.Create(ctx, &customer)
+	
+	ctx.Bind(&customer)
+	err := cus.CustomerUsecase.Create(ctx, &customer)
 	
 	if err != nil {
-		return c.JSON(getStatusCode(err), ResponseError{Message: err.Error()})
+		log.Println("#ERROR: ", err)
+		ctx.JSON(http.StatusInternalServerError, gin.H{"errorMessage": "There was an internal error."})
+		return
 	}
 
-	return c.JSON(http.StatusCreated, article)
+	ctx.JSON(http.StatusCreated, customer)
 }
 
-func (cus *CustomerHandler) Fetch(c gin.Context) err error {
-	var customer domain.Customer
-
-	if err != nil {
-		return c.JSON(http.StatusUnprocessableEntity, err.Error())
+func (cus *CustomerHandler) GetById(ctx *gin.Context) {
+	var request struct {
+		ID int64 `uri:"id"`
 	}
 
-	ctx := c.Request().Context()
-	err = cus.CustomerUsecase.Fetch(ctx, &customer)
+	if err := ctx.ShouldBindUri(&request); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"msg": err})
+		return
+	}
+	
+	customer, err := cus.CustomerUsecase.GetByID(ctx, request.ID)
 	
 	if err != nil {
-		return c.JSON(getStatusCode(err), ResponseError{Message: err.Error()})
+		log.Println("#ERROR: ", err)
+		ctx.JSON(http.StatusInternalServerError, gin.H{"errorMessage": "There was an internal error."})
+		return
 	}
 
-	return c.JSON(http.StatusOK, article)
+	ctx.JSON(http.StatusOK, customer)
+}
+
+func (cus *CustomerHandler) Fetch(ctx *gin.Context) {
+	customers, err := cus.CustomerUsecase.Fetch(ctx)
+	
+	if err != nil {
+		log.Println("#ERROR: ", err)
+		ctx.JSON(http.StatusInternalServerError, gin.H{"errorMessage": err})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, customers)
+}
+
+func (cus *CustomerHandler) Update(ctx *gin.Context) {
+	var customer domain.Customer
+	var request struct {
+		ID int64 `uri:"id"`
+	}
+	
+	if err := ctx.ShouldBindUri(&request); err != nil {
+		log.Println("#ERROR: ", err)
+		ctx.JSON(http.StatusBadRequest, gin.H{"errorMessage": err})
+		return
+	}
+
+	ctx.Bind(&customer)
+
+	if customer.ID != request.ID {
+		ctx.JSON(http.StatusBadRequest, gin.H{"errorMessage": "The customer ID and request ID does not match."})
+		return
+	}
+
+	err := cus.CustomerUsecase.Update(ctx, &customer)
+	
+	if err != nil {
+		log.Println("#ERROR: ", err)
+		ctx.JSON(http.StatusInternalServerError, gin.H{"errorMessage": "There was an internal error."})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, customer)
+}
+
+func (cus *CustomerHandler) Delete(ctx *gin.Context) {
+	var request struct {
+		ID int64 `uri:"id"`
+	}
+
+	if err := ctx.ShouldBindUri(&request); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"errorMessage": "Invalid customer ID."})
+		return
+	}
+	
+	err := cus.CustomerUsecase.Delete(ctx, request.ID)
+	
+	if err != nil {
+		log.Println("#ERROR: ", err)
+		ctx.JSON(http.StatusInternalServerError, gin.H{"errorMessage": "There was an internal error."})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, nil)
 }

@@ -1,9 +1,7 @@
 package main
 
 import (
-	"net/http"
-
-	handlers "github.com/gulliverwald/clean-arch-go/modules"
+	controller "github.com/gulliverwald/clean-arch-go/modules/customer"
 	
 	"github.com/gin-gonic/gin"
 )
@@ -12,7 +10,7 @@ func main() {
 	app := gin.Default()
 	app.SetTrustedProxies(nil)
 
-	app.Use(handlers.NewCustomerController())
+	controller.NewCustomerController(app)
 
 	app.Run()
 }

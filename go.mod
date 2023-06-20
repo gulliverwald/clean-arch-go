@@ -1,4 +1,4 @@
-module gulliverwald/clean-arch-go
+module github.com/gulliverwald/clean-arch-go
 
 go 1.18
 
