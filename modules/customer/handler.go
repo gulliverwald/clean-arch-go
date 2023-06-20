@@ -14,7 +14,7 @@ type CustomerHandler struct {
 	CustomerUsecase domain.CustomerUsecase
 }
 
-func New(c *gin.Context) {
+func NewCustomerController(c *gin.Context) {
 	useCase = New(&repository.MySqlRepository{})
 
 	handler := &CustomerHandler{
