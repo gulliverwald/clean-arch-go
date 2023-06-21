@@ -18,3 +18,17 @@ services:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
       timeout: 5s
       retries: 10
+    networks:
+      - clean_arch_go
+  app:
+    image: clean-arch
+    build: ..
+    container_name: clean_arch_app
+    ports:
+      - 8080:8080
+    depends_on:
+      - db
+    networks:
+      - clean_arch_go
+networks:
+  clean_arch_go:
