@@ -2,8 +2,8 @@ package repository
 
 import (
 	"context"
-	"log"
 	"database/sql"
+	"log"
 
 	. "github.com/gulliverwald/clean-arch-go/domain"
 )
@@ -13,32 +13,28 @@ type MySqlRepository struct {
 }
 
 func NewMySqlRepository() CustomerRepository {
-	db, err := sql.Open("mysql", "user:password@tcp(127.0.0.1:3306)/example")
-
+	db, err := sql.Open("mysql", "user:password@tcp(localhost:3306)/example")
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	return &MySqlRepository{ db }
+	return &MySqlRepository{Conn: db}
 }
 
 func (mySql *MySqlRepository) Create(ctx context.Context, customer *Customer) error {
-	query := `INSERT INTO customer (firstName, lastName, document) VALUES firstName = $1, lastName = $2, document = $3`
+	query := `INSERT INTO customer (firstName, lastName, document) VALUES (@Firstname, @Lastname, @Document);`
 
 	stmt, err := mySql.Conn.PrepareContext(ctx, query)
-
 	if err != nil {
 		return err
 	}
 
 	res, err := stmt.ExecContext(ctx, customer.Firstname, customer.Lastname, customer.Document)
-
 	if err != nil {
 		return err
 	}
 
 	lastID, err := res.LastInsertId()
-
 	if err != nil {
 		return err
 	}

@@ -19,7 +19,6 @@ func NewCustomerUsecase(r CustomerRepository) *UseCases {
 
 func (ucase *UseCases) Create(ctx context.Context, customer *Customer) error {
 	err := ucase.repository.Create(ctx, customer)
-
 	if err != nil {
 		return err
 	}

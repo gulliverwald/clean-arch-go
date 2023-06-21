@@ -1,8 +1,8 @@
 package controller
 
 import (
-	"net/http"
 	"log"
+	"net/http"
 
 	repository "github.com/gulliverwald/clean-arch-go/modules/customer/repositories"
 	. "github.com/gulliverwald/clean-arch-go/modules/customer/usecase"
@@ -31,10 +31,9 @@ func NewCustomerController(route *gin.Engine) {
 
 func (cus *CustomerHandler) Create(ctx *gin.Context) {
 	var customer domain.Customer
-	
+
 	ctx.Bind(&customer)
 	err := cus.CustomerUsecase.Create(ctx, &customer)
-	
 	if err != nil {
 		log.Println("#ERROR: ", err)
 		ctx.JSON(http.StatusInternalServerError, gin.H{"errorMessage": "There was an internal error."})
@@ -53,9 +52,8 @@ func (cus *CustomerHandler) GetById(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, gin.H{"msg": err})
 		return
 	}
-	
+
 	customer, err := cus.CustomerUsecase.GetByID(ctx, request.ID)
-	
 	if err != nil {
 		log.Println("#ERROR: ", err)
 		ctx.JSON(http.StatusInternalServerError, gin.H{"errorMessage": "There was an internal error."})
@@ -67,7 +65,6 @@ func (cus *CustomerHandler) GetById(ctx *gin.Context) {
 
 func (cus *CustomerHandler) Fetch(ctx *gin.Context) {
 	customers, err := cus.CustomerUsecase.Fetch(ctx)
-	
 	if err != nil {
 		log.Println("#ERROR: ", err)
 		ctx.JSON(http.StatusInternalServerError, gin.H{"errorMessage": err})
@@ -82,7 +79,7 @@ func (cus *CustomerHandler) Update(ctx *gin.Context) {
 	var request struct {
 		ID int64 `uri:"id"`
 	}
-	
+
 	if err := ctx.ShouldBindUri(&request); err != nil {
 		log.Println("#ERROR: ", err)
 		ctx.JSON(http.StatusBadRequest, gin.H{"errorMessage": err})
@@ -97,7 +94,6 @@ func (cus *CustomerHandler) Update(ctx *gin.Context) {
 	}
 
 	err := cus.CustomerUsecase.Update(ctx, &customer)
-	
 	if err != nil {
 		log.Println("#ERROR: ", err)
 		ctx.JSON(http.StatusInternalServerError, gin.H{"errorMessage": "There was an internal error."})
@@ -116,9 +112,8 @@ func (cus *CustomerHandler) Delete(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, gin.H{"errorMessage": "Invalid customer ID."})
 		return
 	}
-	
+
 	err := cus.CustomerUsecase.Delete(ctx, request.ID)
-	
 	if err != nil {
 		log.Println("#ERROR: ", err)
 		ctx.JSON(http.StatusInternalServerError, gin.H{"errorMessage": "There was an internal error."})
