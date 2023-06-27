@@ -1,16 +1,22 @@
 package main
 
 import (
-	controller "github.com/gulliverwald/clean-arch-go/modules/customer"
-	
+	customerDelivery "github.com/gulliverwald/clean-arch-go/modules/customer/delivery"
+	serviceDelivery "github.com/gulliverwald/clean-arch-go/modules/service/delivery"
+
 	"github.com/gin-gonic/gin"
 )
 
-func main() {
+func initializeRESTful() {
 	app := gin.Default()
 	app.SetTrustedProxies(nil)
 
-	controller.NewCustomerController(app)
+	customerDelivery.NewCustomerHttpHandler(app)
+	serviceDelivery.NewServiceHttpHandler(app)
 
 	app.Run()
+}
+
+func main() {
+	initializeRESTful()
 }

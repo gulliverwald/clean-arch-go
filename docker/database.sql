@@ -1,8 +1,9 @@
+DROP DATABASE example;
 CREATE DATABASE example;
 USE example;
 
 CREATE TABLE customer(
-    `id` INT NOT NULL AUTO_INCREMENT,
+    `id` INT(11) NOT NULL AUTO_INCREMENT,
     `firstName` VARCHAR(30) NOT NULL,
     `lastName` VARCHAR(30) NOT NULL,
     `document` VARCHAR(100) NOT NULL,
@@ -10,16 +11,18 @@ CREATE TABLE customer(
     `updatedAt` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (id),
     UNIQUE INDEX (document)
-)
+);
 
 CREATE TABLE service(
-    `id` INT NOT NULL AUTO_INCREMENT,
+    `id` INT(11) NOT NULL AUTO_INCREMENT,
     `name` VARCHAR(100) NOT NULL,
-    `price` FLOAT(6,2) NOT NULL,
-    `customerId` INT,
+    `price` INT(8) NOT NULL,
+    `duration` INT(3) NOT NULL,
+    `scheduleDate` DATETIME NOT NULL,
+    `customerId` INT(11),
     `createdAt` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     `updatedAt` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (id),
     FOREIGN KEY (customerId) 
         REFERENCES customer(id)
-)
+);

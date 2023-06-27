@@ -1,10 +1,10 @@
-version: "3.7"
+version: "3"
 
 services:
   db:
     image: mysql:5.7
     container_name: clean_arch_go_mysql
-    command: mysqld --user=root
+    command: mysqld -u root
     volumes:
       - ./example.sql:/var/lib/mysql
     ports:
@@ -13,11 +13,7 @@ services:
       - MYSQL_DATABASE=example
       - MYSQL_USER=user
       - MYSQL_PASSWORD=password
-      - MYSQL_ROOT_PASSWORD=root
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
-      timeout: 5s
-      retries: 10
+      - MYSQL_ROOT_PASSWORD=password
     networks:
       - clean_arch_go
   app:

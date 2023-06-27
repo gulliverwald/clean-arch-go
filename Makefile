@@ -3,7 +3,11 @@ ROOT_DIR:=$(shell dirname $(shell pwd))
 
 .PHONY: up
 up: ## Start the app in docker 
-	cd docker && docker compose up -d	
+	cd docker && docker compose up -d
+
+.PHONY: migrate-db
+migrate-db: ## Migrate the database.sql into the mysql container
+	cd docker && docker exec -i clean_arch_go_mysql mysql -uuser -ppassword example < database.sql
 
 .PHONY: clean
 clean: ## Clean up the app in docker

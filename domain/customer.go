@@ -3,12 +3,12 @@ package domain
 import "context"
 
 type Customer struct {
-	ID		  	int64 	`json:"id"`
-	Firstname 	string 	`json:"firstName"`
-	Lastname 	string 	`json:"lastName"`
-	Document	string	`json:"document"`
-	CreatedAt 	string 	`json:"created_at"`
-	UpdatedAt 	string 	`json:"updated_at"`
+	ID        int64  `json:"id"`
+	Firstname string `json:"firstName"`
+	Lastname  string `json:"lastName"`
+	Document  string `json:"document"`
+	CreatedAt string `json:"created_at"`
+	UpdatedAt string `json:"updated_at"`
 }
 
 type CustomerUsecase interface {

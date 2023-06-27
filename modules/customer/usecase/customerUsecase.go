@@ -2,18 +2,20 @@ package usecase
 
 import (
 	"context"
-	"fmt"
 
 	. "github.com/gulliverwald/clean-arch-go/domain"
+	customError "github.com/gulliverwald/clean-arch-go/error"
 )
 
 type UseCases struct {
-	repository CustomerRepository
+	repository   CustomerRepository
+	errorHandler customError.ErrorRepository
 }
 
-func NewCustomerUsecase(r CustomerRepository) *UseCases {
+func NewCustomerUsecase(r CustomerRepository, e customError.ErrorRepository) *UseCases {
 	return &UseCases{
-		repository: r,
+		repository:   r,
+		errorHandler: e,
 	}
 }
 
@@ -27,26 +29,37 @@ func (ucase *UseCases) Create(ctx context.Context, customer *Customer) error {
 }
 
 func (ucase *UseCases) Fetch(ctx context.Context) ([]Customer, error) {
-	fmt.Printf("buscar\n")
+	customers, err := ucase.repository.Fetch(ctx)
+	if err != nil {
+		return customers, err
+	}
 
-	return []Customer{}, nil
+	return customers, nil
 }
 
 func (ucase *UseCases) GetByID(ctx context.Context, id int64) (Customer, error) {
-	fmt.Printf("busquei pelo id\n")
-	fmt.Printf("id: %d\n", id)
+	customer, err := ucase.repository.GetByID(ctx, id)
+	if err != nil {
+		return customer, err
+	}
 
-	return Customer{}, nil
+	return customer, nil
 }
 
-func (ucase *UseCases) Update(context.Context, *Customer) error {
-	fmt.Printf("atualizar\n")
+func (ucase *UseCases) Update(ctx context.Context, customer *Customer) error {
+	err := ucase.repository.Update(ctx, customer)
+	if err != nil {
+		return err
+	}
 
 	return nil
 }
 
 func (ucase *UseCases) Delete(ctx context.Context, id int64) error {
-	fmt.Printf("deletar\n")
+	err := ucase.repository.Delete(ctx, id)
+	if err != nil {
+		return err
+	}
 
 	return nil
 }

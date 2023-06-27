@@ -1,9 +1,11 @@
-package controller
+package delivery
 
 import (
 	"log"
 	"net/http"
+	"strings"
 
+	customError "github.com/gulliverwald/clean-arch-go/error"
 	repository "github.com/gulliverwald/clean-arch-go/modules/customer/repositories"
 	. "github.com/gulliverwald/clean-arch-go/modules/customer/usecase"
 
@@ -15,8 +17,10 @@ type CustomerHandler struct {
 	CustomerUsecase domain.CustomerUsecase
 }
 
-func NewCustomerController(route *gin.Engine) {
-	useCase := NewCustomerUsecase(&repository.MySqlRepository{})
+func NewCustomerHttpHandler(route *gin.Engine) {
+	repository := repository.NewMySqlRepository()
+	errorRepository := customError.NewHttpError()
+	useCase := NewCustomerUsecase(repository, errorRepository)
 
 	handler := &CustomerHandler{
 		CustomerUsecase: useCase,
@@ -29,13 +33,25 @@ func NewCustomerController(route *gin.Engine) {
 	route.DELETE("/customer/:id", handler.Delete)
 }
 
-func (cus *CustomerHandler) Create(ctx *gin.Context) {
+func (httpHandler *CustomerHandler) Create(ctx *gin.Context) {
 	var customer domain.Customer
 
 	ctx.Bind(&customer)
-	err := cus.CustomerUsecase.Create(ctx, &customer)
+	err := httpHandler.CustomerUsecase.Create(ctx, &customer)
 	if err != nil {
 		log.Println("#ERROR: ", err)
+		customError, ok := err.(customError.CustomError)
+
+		if ok {
+			ctx.JSON(customError.ErrorCode, gin.H{"errorMessage": customError.ErrorMessage})
+			return
+		}
+
+		if strings.Contains(err.Error(), "Duplicate entry") {
+			ctx.JSON(http.StatusBadRequest, gin.H{"errorMessage": "Customer with document already exists."})
+			return
+		}
+
 		ctx.JSON(http.StatusInternalServerError, gin.H{"errorMessage": "There was an internal error."})
 		return
 	}
@@ -43,19 +59,26 @@ func (cus *CustomerHandler) Create(ctx *gin.Context) {
 	ctx.JSON(http.StatusCreated, customer)
 }
 
-func (cus *CustomerHandler) GetById(ctx *gin.Context) {
+func (httpHandler *CustomerHandler) GetById(ctx *gin.Context) {
 	var request struct {
 		ID int64 `uri:"id"`
 	}
 
 	if err := ctx.ShouldBindUri(&request); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"msg": err})
+		ctx.JSON(http.StatusBadRequest, gin.H{"errorMessage": "Invalid input."})
 		return
 	}
 
-	customer, err := cus.CustomerUsecase.GetByID(ctx, request.ID)
+	customer, err := httpHandler.CustomerUsecase.GetByID(ctx, request.ID)
 	if err != nil {
 		log.Println("#ERROR: ", err)
+		customError, ok := err.(customError.CustomError)
+
+		if ok {
+			ctx.JSON(customError.ErrorCode, gin.H{"errorMessage": customError.ErrorMessage})
+			return
+		}
+
 		ctx.JSON(http.StatusInternalServerError, gin.H{"errorMessage": "There was an internal error."})
 		return
 	}
@@ -63,10 +86,17 @@ func (cus *CustomerHandler) GetById(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, customer)
 }
 
-func (cus *CustomerHandler) Fetch(ctx *gin.Context) {
-	customers, err := cus.CustomerUsecase.Fetch(ctx)
+func (httpHandler *CustomerHandler) Fetch(ctx *gin.Context) {
+	customers, err := httpHandler.CustomerUsecase.Fetch(ctx)
 	if err != nil {
 		log.Println("#ERROR: ", err)
+		customError, ok := err.(customError.CustomError)
+
+		if ok {
+			ctx.JSON(customError.ErrorCode, gin.H{"errorMessage": customError.ErrorMessage})
+			return
+		}
+
 		ctx.JSON(http.StatusInternalServerError, gin.H{"errorMessage": err})
 		return
 	}
@@ -74,7 +104,7 @@ func (cus *CustomerHandler) Fetch(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, customers)
 }
 
-func (cus *CustomerHandler) Update(ctx *gin.Context) {
+func (httpHandler *CustomerHandler) Update(ctx *gin.Context) {
 	var customer domain.Customer
 	var request struct {
 		ID int64 `uri:"id"`
@@ -93,9 +123,21 @@ func (cus *CustomerHandler) Update(ctx *gin.Context) {
 		return
 	}
 
-	err := cus.CustomerUsecase.Update(ctx, &customer)
+	err := httpHandler.CustomerUsecase.Update(ctx, &customer)
 	if err != nil {
 		log.Println("#ERROR: ", err)
+		customError, ok := err.(customError.CustomError)
+
+		if ok {
+			ctx.JSON(customError.ErrorCode, gin.H{"errorMessage": customError.ErrorMessage})
+			return
+		}
+
+		if strings.Contains(err.Error(), "Duplicate entry") {
+			ctx.JSON(http.StatusBadRequest, gin.H{"errorMessage": "Customer with document already exists."})
+			return
+		}
+
 		ctx.JSON(http.StatusInternalServerError, gin.H{"errorMessage": "There was an internal error."})
 		return
 	}
@@ -103,7 +145,7 @@ func (cus *CustomerHandler) Update(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, customer)
 }
 
-func (cus *CustomerHandler) Delete(ctx *gin.Context) {
+func (httpHandler *CustomerHandler) Delete(ctx *gin.Context) {
 	var request struct {
 		ID int64 `uri:"id"`
 	}
@@ -113,12 +155,19 @@ func (cus *CustomerHandler) Delete(ctx *gin.Context) {
 		return
 	}
 
-	err := cus.CustomerUsecase.Delete(ctx, request.ID)
+	err := httpHandler.CustomerUsecase.Delete(ctx, request.ID)
 	if err != nil {
 		log.Println("#ERROR: ", err)
+		customError, ok := err.(customError.CustomError)
+
+		if ok {
+			ctx.JSON(customError.ErrorCode, gin.H{"errorMessage": customError.ErrorMessage})
+			return
+		}
+
 		ctx.JSON(http.StatusInternalServerError, gin.H{"errorMessage": "There was an internal error."})
 		return
 	}
 
-	ctx.JSON(http.StatusOK, nil)
+	ctx.JSON(http.StatusOK, gin.H{"deleted": true})
 }
