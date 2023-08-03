@@ -63,7 +63,7 @@ func (ucase *UseCases) Fetch(ctx context.Context) ([]Service, error) {
 	return services, nil
 }
 
-func (ucase *UseCases) GetByID(ctx context.Context, id int64) (Service, error) {
+func (ucase *UseCases) GetByID(ctx context.Context, id int) (Service, error) {
 	service, err := ucase.repository.GetByID(ctx, id)
 	if err != nil {
 		return service, err
@@ -102,7 +102,7 @@ func (ucase *UseCases) Update(ctx context.Context, service *Service) error {
 	return nil
 }
 
-func (ucase *UseCases) Delete(ctx context.Context, id int64) error {
+func (ucase *UseCases) Delete(ctx context.Context, id int) error {
 	err := ucase.repository.Delete(ctx, id)
 	if err != nil {
 		return err

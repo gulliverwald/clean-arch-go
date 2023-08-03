@@ -62,7 +62,7 @@ func (httpHandler *ServiceHandler) Create(ctx *gin.Context) {
 
 func (httpHandler *ServiceHandler) GetById(ctx *gin.Context) {
 	var request struct {
-		ID int64 `uri:"id"`
+		ID int `uri:"id"`
 	}
 
 	if err := ctx.ShouldBindUri(&request); err != nil {
@@ -108,7 +108,7 @@ func (httpHandler *ServiceHandler) Fetch(ctx *gin.Context) {
 func (httpHandler *ServiceHandler) Update(ctx *gin.Context) {
 	var service domain.Service
 	var request struct {
-		ID int64 `uri:"id"`
+		ID int `uri:"id"`
 	}
 
 	if err := ctx.ShouldBindUri(&request); err != nil {
@@ -153,7 +153,7 @@ func (httpHandler *ServiceHandler) Update(ctx *gin.Context) {
 
 func (httpHandler *ServiceHandler) Delete(ctx *gin.Context) {
 	var request struct {
-		ID int64 `uri:"id"`
+		ID int `uri:"id"`
 	}
 
 	if err := ctx.ShouldBindUri(&request); err != nil {

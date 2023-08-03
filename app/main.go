@@ -1,8 +1,8 @@
 package main
 
 import (
-	customerDelivery "github.com/gulliverwald/clean-arch-go/modules/customer/delivery"
-	serviceDelivery "github.com/gulliverwald/clean-arch-go/modules/service/delivery"
+	customerHttp "github.com/gulliverwald/clean-arch-go/modules/customer/delivery"
+	serviceHttp "github.com/gulliverwald/clean-arch-go/modules/service/delivery"
 
 	"github.com/gin-gonic/gin"
 )
@@ -11,8 +11,8 @@ func initializeRESTful() {
 	app := gin.Default()
 	app.SetTrustedProxies(nil)
 
-	customerDelivery.NewCustomerHttpHandler(app)
-	serviceDelivery.NewServiceHttpHandler(app)
+	customerHttp.NewCustomerHttpHandler(app)
+	serviceHttp.NewServiceHttpHandler(app)
 
 	app.Run()
 }

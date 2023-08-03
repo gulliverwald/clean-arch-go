@@ -37,7 +37,7 @@ func (ucase *UseCases) Fetch(ctx context.Context) ([]Customer, error) {
 	return customers, nil
 }
 
-func (ucase *UseCases) GetByID(ctx context.Context, id int64) (Customer, error) {
+func (ucase *UseCases) GetByID(ctx context.Context, id int) (Customer, error) {
 	customer, err := ucase.repository.GetByID(ctx, id)
 	if err != nil {
 		return customer, err
@@ -55,7 +55,7 @@ func (ucase *UseCases) Update(ctx context.Context, customer *Customer) error {
 	return nil
 }
 
-func (ucase *UseCases) Delete(ctx context.Context, id int64) error {
+func (ucase *UseCases) Delete(ctx context.Context, id int) error {
 	err := ucase.repository.Delete(ctx, id)
 	if err != nil {
 		return err

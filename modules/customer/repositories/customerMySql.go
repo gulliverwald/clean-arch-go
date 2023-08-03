@@ -38,7 +38,7 @@ func (mySql *MySqlRepository) Create(ctx context.Context, customer *Customer) er
 		return err
 	}
 
-	customer.ID = lastID
+	customer.ID = int(lastID)
 
 	return nil
 }
@@ -73,7 +73,7 @@ func (mySql *MySqlRepository) Fetch(ctx context.Context) ([]Customer, error) {
 	return customers, nil
 }
 
-func (mySql *MySqlRepository) GetByID(ctx context.Context, id int64) (Customer, error) {
+func (mySql *MySqlRepository) GetByID(ctx context.Context, id int) (Customer, error) {
 	customer := Customer{}
 
 	err := mySql.Conn.QueryRow(`SELECT * FROM customer WHERE id = ?`, id).Scan(
@@ -106,7 +106,7 @@ func (mySql *MySqlRepository) Update(ctx context.Context, customer *Customer) er
 	return nil
 }
 
-func (mySql *MySqlRepository) Delete(ctx context.Context, id int64) error {
+func (mySql *MySqlRepository) Delete(ctx context.Context, id int) error {
 	_, err := mySql.Conn.Exec(`DELETE FROM customer WHERE id = ?`, id)
 	if err != nil {
 		return err

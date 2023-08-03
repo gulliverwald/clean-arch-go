@@ -46,7 +46,7 @@ func (mySql *MySqlRepository) Create(ctx context.Context, service *Service) erro
 		return err
 	}
 
-	service.ID = lastID
+	service.ID = int(lastID)
 
 	return nil
 }
@@ -83,7 +83,7 @@ func (mySql *MySqlRepository) Fetch(ctx context.Context) ([]Service, error) {
 	return services, nil
 }
 
-func (mySql *MySqlRepository) GetByID(ctx context.Context, id int64) (Service, error) {
+func (mySql *MySqlRepository) GetByID(ctx context.Context, id int) (Service, error) {
 	service := Service{}
 
 	err := mySql.Conn.QueryRow(`SELECT * FROM service WHERE id = ?`, id).Scan(
@@ -159,7 +159,7 @@ func (mySql *MySqlRepository) Update(ctx context.Context, service *Service) erro
 	return nil
 }
 
-func (mySql *MySqlRepository) Delete(ctx context.Context, id int64) error {
+func (mySql *MySqlRepository) Delete(ctx context.Context, id int) error {
 	_, err := mySql.Conn.Exec(`DELETE FROM service WHERE id = ?`, id)
 	if err != nil {
 		return err
